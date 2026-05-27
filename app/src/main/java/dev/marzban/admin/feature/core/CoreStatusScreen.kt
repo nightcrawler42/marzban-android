@@ -1,6 +1,7 @@
 package dev.marzban.admin.feature.core
 
-import android.widget.Toast
+import dev.marzban.admin.core.ui.LocalSnackbarHostState
+import dev.marzban.admin.core.ui.HoldToConfirmButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,7 +30,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -48,9 +48,9 @@ fun CoreStatusScreen(
     viewModel: CoreStatusViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val context = LocalContext.current
+    val snackbar = LocalSnackbarHostState.current
     LaunchedEffect(Unit) {
-        viewModel.events.collect { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
+        viewModel.events.collect { snackbar.showSnackbar(it) }
     }
     var confirmRestart by remember { mutableStateOf(false) }
     TitleScaffold(
@@ -93,8 +93,20 @@ fun CoreStatusScreen(
         AlertDialog(
             onDismissRequest = { confirmRestart = false },
             title = { Text("Restart Xray core?") },
-            text = { Text("Active connections will be dropped briefly.") },
-            confirmButton = { TextButton(onClick = { confirmRestart = false; viewModel.restart() }) { Text("Restart") } },
+            text = {
+                Column {
+                    Text(
+                        "Every live connection on the panel and its nodes will drop briefly.",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    HoldToConfirmButton(
+                        label = "Hold to restart",
+                        onConfirm = { confirmRestart = false; viewModel.restart() },
+                    )
+                }
+            },
+            confirmButton = {},
             dismissButton = { TextButton(onClick = { confirmRestart = false }) { Text("Cancel") } },
         )
     }

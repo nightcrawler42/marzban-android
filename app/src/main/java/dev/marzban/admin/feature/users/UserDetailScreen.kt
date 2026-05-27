@@ -40,15 +40,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import android.widget.Toast
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.marzban.admin.core.ui.ErrorPlaceholder
 import dev.marzban.admin.core.ui.KeyValueRow
 import dev.marzban.admin.core.ui.LoadingPlaceholder
+import dev.marzban.admin.core.ui.LocalSnackbarHostState
 import dev.marzban.admin.core.ui.TitleScaffold
 import dev.marzban.admin.core.ui.UiState
 import dev.marzban.admin.core.util.formatBytes
@@ -65,12 +64,12 @@ fun UserDetailScreen(
     viewModel: UserDetailViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val context = LocalContext.current
+    val snackbar = LocalSnackbarHostState.current
 
     LaunchedEffect(Unit) {
         viewModel.actions.collect { action ->
             when (action) {
-                is UserAction.Toast -> Toast.makeText(context, action.message, Toast.LENGTH_SHORT).show()
+                is UserAction.Toast -> snackbar.showSnackbar(action.message)
                 is UserAction.Deleted -> onDeleted()
             }
         }
@@ -130,13 +129,33 @@ fun UserDetailScreen(
         }
     }
     if (confirmDelete) {
+        val user = (state as? UiState.Success)?.value
         AlertDialog(
             onDismissRequest = { confirmDelete = false },
             title = { Text("Delete user?") },
-            text = { Text("This action cannot be undone.") },
+            text = {
+                Column {
+                    Text("You are about to delete:", style = MaterialTheme.typography.bodyMedium)
+                    Spacer(Modifier.height(8.dp))
+                    Text("• Username: ${user?.username ?: username}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold)
+                    if (user != null) {
+                        Text("• Used traffic: ${formatBytes(user.usedTraffic)}", style = MaterialTheme.typography.bodySmall)
+                        Text("• Expires: ${formatEpoch(user.expire)}", style = MaterialTheme.typography.bodySmall)
+                        Text("• Status: ${user.status.name.lowercase()}", style = MaterialTheme.typography.bodySmall)
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        "This cannot be undone.",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            },
             confirmButton = {
                 TextButton(onClick = { confirmDelete = false; viewModel.delete() }) {
-                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                    Text("Delete", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold)
                 }
             },
             dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("Cancel") } }

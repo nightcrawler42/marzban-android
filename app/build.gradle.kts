@@ -164,6 +164,7 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.zxing.core)
     implementation(libs.vico.compose.m3)
+    implementation(libs.lottie.compose)
 
     testImplementation(libs.junit)
     testImplementation(libs.truth)

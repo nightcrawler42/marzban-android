@@ -44,7 +44,7 @@ import dev.marzban.admin.data.dto.NodeStatus
 fun NodesScreen(
     onOpenDetail: (Int) -> Unit,
     onCreate: () -> Unit,
-    onBack: () -> Unit,
+    onBack: (() -> Unit)? = null,
     viewModel: NodesViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()

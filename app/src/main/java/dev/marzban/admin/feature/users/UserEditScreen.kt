@@ -1,6 +1,6 @@
 package dev.marzban.admin.feature.users
 
-import android.widget.Toast
+import dev.marzban.admin.core.ui.LocalSnackbarHostState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,7 +30,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
@@ -49,13 +48,13 @@ fun UserEditScreen(
     viewModel: UserEditViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val context = LocalContext.current
+    val snackbar = LocalSnackbarHostState.current
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { ev ->
             when (ev) {
                 is UserEditEvent.Saved -> onSaved(ev.username)
-                is UserEditEvent.Failure -> Toast.makeText(context, ev.message.ifBlank { "Failed" }, Toast.LENGTH_SHORT).show()
+                is UserEditEvent.Failure -> snackbar.showSnackbar(ev.message.ifBlank { "Failed" })
             }
         }
     }

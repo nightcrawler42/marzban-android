@@ -1,6 +1,6 @@
 package dev.marzban.admin.feature.admins
 
-import android.widget.Toast
+import dev.marzban.admin.core.ui.LocalSnackbarHostState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,7 +31,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -51,12 +50,12 @@ fun AdminDetailScreen(
     viewModel: AdminDetailViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val context = LocalContext.current
+    val snackbar = LocalSnackbarHostState.current
 
     LaunchedEffect(Unit) {
         viewModel.actions.collect { action ->
             when (action) {
-                is AdminAction.Toast -> Toast.makeText(context, action.message, Toast.LENGTH_SHORT).show()
+                is AdminAction.Toast -> snackbar.showSnackbar(action.message)
                 is AdminAction.Deleted -> onDeleted()
             }
         }

@@ -1,6 +1,6 @@
 package dev.marzban.admin.feature.core
 
-import android.widget.Toast
+import dev.marzban.admin.core.ui.LocalSnackbarHostState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,7 +19,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -34,9 +33,9 @@ fun CoreConfigScreen(
     viewModel: CoreConfigViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val context = LocalContext.current
+    val snackbar = LocalSnackbarHostState.current
     LaunchedEffect(Unit) {
-        viewModel.events.collect { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
+        viewModel.events.collect { snackbar.showSnackbar(it) }
     }
     TitleScaffold(
         title = "Core config",

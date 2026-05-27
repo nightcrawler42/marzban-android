@@ -2,7 +2,9 @@ package dev.marzban.admin.feature.backup
 
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.widget.Toast
+import dev.marzban.admin.core.ui.LocalSnackbarHostState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -56,10 +58,12 @@ private const val TELEGRAM_DOCS = "https://gozargah.github.io/marzban/en/docs/te
 fun BackupScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
+    val snackbar = LocalSnackbarHostState.current
+    val scope = rememberCoroutineScope()
     fun copy(value: String) {
         val cm = ContextCompat.getSystemService(context, ClipboardManager::class.java) ?: return
         cm.setPrimaryClip(ClipData.newPlainText("backup command", value))
-        Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
+        scope.launch { snackbar.showSnackbar("Copied") }
     }
     TitleScaffold(title = "Database backup", onBack = onBack) { padding ->
         LazyColumn(

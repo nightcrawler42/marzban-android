@@ -2,7 +2,6 @@ package dev.marzban.admin.feature.nodes
 
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,6 +32,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import dev.marzban.admin.core.ui.LocalSnackbarHostState
+import kotlinx.coroutines.launch
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -58,10 +60,12 @@ fun NodeDetailScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val snackbar = LocalSnackbarHostState.current
+    val scope = rememberCoroutineScope()
     LaunchedEffect(Unit) {
         viewModel.actions.collect { action ->
             when (action) {
-                is NodeAction.Toast -> Toast.makeText(context, action.message, Toast.LENGTH_SHORT).show()
+                is NodeAction.Toast -> snackbar.showSnackbar(action.message)
                 is NodeAction.Deleted -> onDeleted()
             }
         }
@@ -145,7 +149,7 @@ fun NodeDetailScreen(
                                 TextButton(onClick = {
                                     val cm = ContextCompat.getSystemService(context, ClipboardManager::class.java)
                                     cm?.setPrimaryClip(ClipData.newPlainText("node certificate", cert))
-                                    Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
+                                    scope.launch { snackbar.showSnackbar("Certificate copied") }
                                 }) { Text("Copy certificate") }
                             }
                         }

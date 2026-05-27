@@ -142,7 +142,10 @@ private fun DashboardContent(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(bottom = 24.dp),
+        contentPadding = PaddingValues(
+            top = 4.dp,
+            bottom = 24.dp + dev.marzban.admin.core.ui.safeBottomPadding(),
+        ),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         if (system != null) {
@@ -163,18 +166,12 @@ private fun HeroHeader(
     lastUpdated: Long?,
     refreshing: Boolean,
 ) {
-    val gradient = Brush.linearGradient(
-        colors = listOf(
-            MaterialTheme.colorScheme.primary,
-            MaterialTheme.colorScheme.tertiary,
-        )
-    )
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clip(RoundedCornerShape(24.dp))
-            .background(gradient)
+            .clip(RoundedCornerShape(28.dp))
+            .background(dev.marzban.admin.core.ui.theme.BrandGradients.hero)
             .padding(20.dp),
     ) {
         Column {
