@@ -19,6 +19,7 @@ import dev.marzban.admin.core.network.SessionEventBus
 import dev.marzban.admin.feature.admins.AdminDetailScreen
 import dev.marzban.admin.feature.admins.AdminEditScreen
 import dev.marzban.admin.feature.admins.AdminsScreen
+import dev.marzban.admin.feature.backup.BackupScreen
 import dev.marzban.admin.feature.core.CoreConfigScreen
 import dev.marzban.admin.feature.core.CoreStatusScreen
 import dev.marzban.admin.feature.hosts.HostsScreen
@@ -73,6 +74,7 @@ fun MarzbanNavHost(
                 onOpenHosts = { navController.navigate("hosts") },
                 onOpenInbounds = { navController.navigate("inbounds") },
                 onOpenCore = { navController.navigate("core") },
+                onOpenBackup = { navController.navigate("backup") },
                 onOpenSettings = { navController.navigate("settings") },
             )
         }
@@ -185,6 +187,9 @@ fun MarzbanNavHost(
         }
         composable("core/logs") {
             LogsScreen(onBack = { navController.popBackStack() })
+        }
+        composable("backup") {
+            BackupScreen(onBack = { navController.popBackStack() })
         }
         composable("settings") {
             SettingsScreen(

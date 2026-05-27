@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.AssignmentLate
+import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Settings
@@ -38,6 +39,7 @@ fun MoreScreen(
     onOpenHosts: () -> Unit,
     onOpenInbounds: () -> Unit,
     onOpenCore: () -> Unit,
+    onOpenBackup: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
     TitleScaffold(title = "More") { padding ->
@@ -50,6 +52,7 @@ fun MoreScreen(
             item { MoreEntry("Hosts", "Edit proxy hosts per inbound", Icons.Default.Dns, onOpenHosts) }
             item { MoreEntry("Inbounds", "Inspect configured inbounds", Icons.AutoMirrored.Filled.List, onOpenInbounds) }
             item { MoreEntry("Core", "Status, config editor, live logs", Icons.Default.Memory, onOpenCore) }
+            item { MoreEntry("Backup", "Database snapshot (server-side)", Icons.Default.Backup, onOpenBackup) }
             item { MoreEntry("Settings", "Server, security, account", Icons.Default.Settings, onOpenSettings) }
         }
     }

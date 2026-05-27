@@ -41,6 +41,7 @@ fun HomeShell(
     onOpenHosts: () -> Unit,
     onOpenInbounds: () -> Unit,
     onOpenCore: () -> Unit,
+    onOpenBackup: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
     var current by rememberSaveable { mutableStateOf(HomeTab.Dashboard.key) }
@@ -77,6 +78,7 @@ fun HomeShell(
                 onOpenHosts = onOpenHosts,
                 onOpenInbounds = onOpenInbounds,
                 onOpenCore = onOpenCore,
+                onOpenBackup = onOpenBackup,
                 onOpenSettings = onOpenSettings,
             )
         }
