@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Marzban Admin</string>
+
+    <!-- Login -->
+    <string name="login_title">Sign in</string>
+    <string name="login_server_url">Server URL</string>
+    <string name="login_server_url_hint">https://panel.example.com</string>
+    <string name="login_username">Username</string>
+    <string name="login_password">Password</string>
+    <string name="login_action">Sign in</string>
+    <string name="login_trust_all_certs">Trust all TLS certificates (insecure)</string>
+    <string name="login_trust_all_certs_warning">Disables TLS verification. Use only on private networks with self-signed certificates.</string>
+    <string name="login_error_invalid_url">Enter a valid server URL</string>
+    <string name="login_error_credentials">Invalid credentials</string>
+    <string name="login_error_network">Network error: %1$s</string>
+
+    <!-- Common -->
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_create">Create</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="action_retry">Retry</string>
+    <string name="action_share">Share</string>
+    <string name="action_copy">Copy</string>
+    <string name="action_confirm">Confirm</string>
+    <string name="action_logout">Sign out</string>
+    <string name="action_back">Back</string>
+    <string name="action_more">More</string>
+    <string name="copied_to_clipboard">Copied to clipboard</string>
+    <string name="loading">Loading…</string>
+    <string name="empty_state">Nothing to show.</string>
+    <string name="error_generic">Something went wrong.</string>
+    <string name="confirm_delete_title">Delete?</string>
+    <string name="confirm_delete_message">This action cannot be undone.</string>
+
+    <!-- Navigation -->
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_users">Users</string>
+    <string name="nav_admins">Admins</string>
+    <string name="nav_nodes">Nodes</string>
+    <string name="nav_hosts">Hosts</string>
+    <string name="nav_inbounds">Inbounds</string>
+    <string name="nav_core">Core</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_title">Dashboard</string>
+    <string name="dashboard_cpu">CPU</string>
+    <string name="dashboard_memory">Memory</string>
+    <string name="dashboard_users_total">Total users</string>
+    <string name="dashboard_users_active">Active users</string>
+    <string name="dashboard_users_online">Online users</string>
+    <string name="dashboard_bandwidth_in">Incoming</string>
+    <string name="dashboard_bandwidth_out">Outgoing</string>
+    <string name="dashboard_core_version">Core version</string>
+    <string name="dashboard_core_started">Core running</string>
+    <string name="dashboard_panel_version">Panel version</string>
+
+    <!-- Users -->
+    <string name="users_title">Users</string>
+    <string name="users_search_hint">Search users</string>
+    <string name="users_filter_all">All</string>
+    <string name="users_filter_active">Active</string>
+    <string name="users_filter_disabled">Disabled</string>
+    <string name="users_filter_limited">Limited</string>
+    <string name="users_filter_expired">Expired</string>
+    <string name="users_filter_on_hold">On hold</string>
+    <string name="users_empty">No users found.</string>
+    <string name="user_new">New user</string>
+    <string name="user_edit">Edit user</string>
+    <string name="user_usage">Usage</string>
+    <string name="user_data_limit">Data limit</string>
+    <string name="user_data_used">Used</string>
+    <string name="user_expires">Expires</string>
+    <string name="user_status">Status</string>
+    <string name="user_inbounds">Inbounds</string>
+    <string name="user_subscription">Subscription</string>
+    <string name="user_note">Note</string>
+    <string name="user_action_reset">Reset usage</string>
+    <string name="user_action_revoke">Revoke subscription</string>
+    <string name="user_action_active_next">Activate next plan</string>
+    <string name="user_action_set_owner">Set owner</string>
+    <string name="user_action_delete">Delete user</string>
+    <string name="users_expired_title">Expired users</string>
+    <string name="users_bulk_reset_title">Reset all usage</string>
+    <string name="users_bulk_reset_confirm">Reset usage for every user?</string>
+
+    <!-- Admins -->
+    <string name="admins_title">Admins</string>
+    <string name="admin_new">New admin</string>
+    <string name="admin_edit">Edit admin</string>
+    <string name="admin_sudo">Sudo</string>
+    <string name="admin_telegram_id">Telegram ID</string>
+    <string name="admin_discord_webhook">Discord webhook</string>
+    <string name="admin_disable_users">Disable this admin\'s users</string>
+    <string name="admin_activate_users">Activate this admin\'s users</string>
+    <string name="admin_usage">Usage</string>
+    <string name="admin_reset_usage">Reset usage</string>
+
+    <!-- Nodes -->
+    <string name="nodes_title">Nodes</string>
+    <string name="node_new">New node</string>
+    <string name="node_edit">Edit node</string>
+    <string name="node_address">Address</string>
+    <string name="node_port">Port</string>
+    <string name="node_api_port">API port</string>
+    <string name="node_status">Status</string>
+    <string name="node_version">Version</string>
+    <string name="node_message">Message</string>
+    <string name="node_action_reconnect">Reconnect</string>
+    <string name="node_settings_title">Node settings</string>
+    <string name="node_settings_cert">TLS certificate</string>
+    <string name="node_logs_title">Node logs</string>
+    <string name="node_add_as_new_host">Add as new host</string>
+    <string name="node_usage_chart">Bandwidth (last 30 days)</string>
+
+    <!-- Hosts -->
+    <string name="hosts_title">Hosts</string>
+    <string name="hosts_empty">No hosts configured.</string>
+    <string name="host_remark">Remark</string>
+    <string name="host_address">Address</string>
+    <string name="host_port">Port</string>
+    <string name="host_sni">SNI</string>
+    <string name="host_path">Path</string>
+    <string name="host_host_header">Host header</string>
+    <string name="host_security">Security</string>
+    <string name="host_alpn">ALPN</string>
+    <string name="host_fingerprint">Fingerprint</string>
+    <string name="host_mux">Mux enable</string>
+    <string name="host_allowinsecure">Allow insecure</string>
+    <string name="host_is_disabled">Disabled</string>
+
+    <!-- Inbounds -->
+    <string name="inbounds_title">Inbounds</string>
+
+    <!-- Core -->
+    <string name="core_title">Core</string>
+    <string name="core_config">Config</string>
+    <string name="core_logs">Logs</string>
+    <string name="core_restart">Restart core</string>
+    <string name="core_restart_confirm">Restart Xray core?</string>
+    <string name="core_config_save">Save config</string>
+    <string name="core_config_invalid_json">Invalid JSON</string>
+    <string name="core_logs_paused">Paused</string>
+    <string name="core_logs_clear">Clear</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_server">Server</string>
+    <string name="settings_server_url">Server URL</string>
+    <string name="settings_trust_all">Trust all TLS certificates</string>
+    <string name="settings_trust_all_desc">Allows connecting to panels with self-signed certificates. Reduces security.</string>
+    <string name="settings_account">Account</string>
+    <string name="settings_logged_in_as">Signed in as %1$s</string>
+    <string name="settings_about">About</string>
+    <string name="settings_version">Version %1$s</string>
+</resources>

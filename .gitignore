@@ -1,0 +1,35 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+local.properties
+captures/
+.cxx/
+
+# Kotlin
+.kotlin/
+
+# Output
+*.apk
+*.aab
+*.aar
+*.ap_
+*.dex
+
+# Logs / temp
+*.log
+.DS_Store
+
+# Signing
+keystore.jks
+*.keystore
+key.properties
+
+# CI
+artifacts/
