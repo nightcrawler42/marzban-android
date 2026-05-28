@@ -123,6 +123,7 @@ fun DashboardScreen(
                 is UiState.Success -> DashboardContent(
                     system = data.value.system,
                     core = data.value.core,
+                    usage = data.value.usage,
                     interval = state.interval,
                     lastUpdated = state.lastUpdated,
                     refreshing = state.refreshing,
@@ -136,6 +137,7 @@ fun DashboardScreen(
 private fun DashboardContent(
     system: SystemStatsDto?,
     core: CoreStatsDto?,
+    usage: UsageAggregate?,
     interval: RefreshInterval,
     lastUpdated: Long?,
     refreshing: Boolean,
@@ -152,6 +154,7 @@ private fun DashboardContent(
             item { HeroHeader(system, core, interval, lastUpdated, refreshing) }
             item { GaugesRow(system) }
             item { UsersBreakdownCard(system) }
+            if (usage != null) item { QuotaUsageCard(usage) }
             item { BandwidthCard(system) }
         }
         if (core != null) item { CoreCard(core) }
@@ -196,12 +199,39 @@ private fun HeroHeader(
             }
             Spacer(Modifier.height(8.dp))
             Text(
-                "${system.onlineUsers}",
+                "${system.usersActive}",
                 color = Color.White,
                 style = MaterialTheme.typography.displayLarge,
                 fontWeight = FontWeight.Bold,
             )
-            Text("Online users", color = Color.White.copy(alpha = 0.85f), style = MaterialTheme.typography.titleMedium)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "Active users",
+                    color = Color.White.copy(alpha = 0.85f),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Spacer(Modifier.width(8.dp))
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .background(Color.White.copy(alpha = 0.18f))
+                        .padding(horizontal = 10.dp, vertical = 3.dp),
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(6.dp)
+                                .background(Color(0xFF9CFF9C), RoundedCornerShape(50)),
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        Text(
+                            "${system.onlineUsers} online now",
+                            color = Color.White,
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                    }
+                }
+            }
             Spacer(Modifier.height(12.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (core != null) {
@@ -425,6 +455,72 @@ private fun BandwidthStat(label: String, total: String, speed: String, accent: C
         }
         Text(total, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         Text(speed, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
+private fun QuotaUsageCard(usage: UsageAggregate) {
+    Card(
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Data quota", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                Spacer(Modifier.weight(1f))
+                Text(
+                    "${usage.limitedCount} capped · ${usage.unlimitedCount} unlimited",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Spacer(Modifier.height(10.dp))
+            val animated by animateFloatAsState(
+                targetValue = usage.usedFraction,
+                animationSpec = tween(durationMillis = 600),
+                label = "quota"
+            )
+            androidx.compose.material3.LinearProgressIndicator(
+                progress = { animated },
+                modifier = Modifier.fillMaxWidth().height(10.dp).clip(RoundedCornerShape(50)),
+                trackColor = MaterialTheme.colorScheme.background.copy(alpha = 0.35f),
+            )
+            Spacer(Modifier.height(12.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                QuotaStat("Used", formatBytes(usage.totalUsed), Color(0xFF6F8BFF))
+                QuotaStat(
+                    "Remaining",
+                    if (usage.totalQuota > 0L) formatBytes(usage.remaining) else "—",
+                    Color(0xFF8AE36F),
+                )
+                QuotaStat(
+                    "Total quota",
+                    if (usage.totalQuota > 0L) formatBytes(usage.totalQuota) else "—",
+                    Color(0xFFF6C453),
+                )
+            }
+            if (usage.totalQuota <= 0L) {
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    "No users have data limits yet.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun QuotaStat(label: String, value: String, accent: Color) {
+    Column(horizontalAlignment = Alignment.Start) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(modifier = Modifier.size(6.dp).background(accent, RoundedCornerShape(50)))
+            Spacer(Modifier.width(6.dp))
+            Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Text(value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
     }
 }
 

@@ -27,6 +27,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -71,9 +74,13 @@ fun ExpiredUsersScreen(
 
     val users = (ui.users as? UiState.Success)?.value.orEmpty()
     val allSelected = users.isNotEmpty() && users.all { ui.selected.contains(it) }
+    val modeNoun = when (ui.mode) {
+        CleanupMode.Expired -> "expired"
+        CleanupMode.Limited -> "limited"
+    }
 
     TitleScaffold(
-        title = if (ui.selected.isEmpty()) "Expired users"
+        title = if (ui.selected.isEmpty()) "Cleanup users"
                 else "${ui.selected.size} of ${users.size} selected",
         onBack = onBack,
         actions = {
@@ -89,41 +96,48 @@ fun ExpiredUsersScreen(
             TextButton(onClick = { resetAllSheet = true }) { Text("Reset all") }
         }
     ) { padding ->
-        Box(Modifier.padding(padding).fillMaxSize()) {
-            when (val s = ui.users) {
-                is UiState.Loading -> LoadingPlaceholder()
-                is UiState.Error -> ErrorPlaceholder(s.message, onRetry = viewModel::load)
-                is UiState.Success -> {
-                    if (s.value.isEmpty()) {
-                        EmptyState(
-                            title = "No expired users",
-                            subtitle = "All accounts are within their plans.",
-                        )
-                    } else {
-                        Column(modifier = Modifier.fillMaxSize()) {
-                            LazyColumn(
-                                modifier = Modifier.weight(1f).fillMaxWidth(),
-                                contentPadding = PaddingValues(
-                                    horizontal = 16.dp,
-                                    vertical = 8.dp,
-                                ),
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                            ) {
-                                items(s.value, key = { it }) { username ->
-                                    UserCheckRow(
-                                        username = username,
-                                        selected = ui.selected.contains(username),
-                                        onToggle = { viewModel.toggleSelection(username) },
-                                    )
-                                }
-                            }
-                            ActionBar(
-                                selectedCount = ui.selected.size,
-                                totalCount = s.value.size,
-                                deleting = ui.deleting,
-                                onDeleteSelected = { deleteSelectedDialog = true },
-                                onDeleteAll = { deleteAllDialog = true },
+        Column(Modifier.padding(padding).fillMaxSize()) {
+            ModeToggle(current = ui.mode, onSelect = viewModel::setMode)
+            Box(Modifier.weight(1f).fillMaxWidth()) {
+                when (val s = ui.users) {
+                    is UiState.Loading -> LoadingPlaceholder()
+                    is UiState.Error -> ErrorPlaceholder(s.message, onRetry = viewModel::load)
+                    is UiState.Success -> {
+                        if (s.value.isEmpty()) {
+                            EmptyState(
+                                title = "No $modeNoun users",
+                                subtitle = when (ui.mode) {
+                                    CleanupMode.Expired -> "All accounts are within their plans."
+                                    CleanupMode.Limited -> "No accounts have hit their data cap."
+                                },
                             )
+                        } else {
+                            Column(modifier = Modifier.fillMaxSize()) {
+                                LazyColumn(
+                                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                                    contentPadding = PaddingValues(
+                                        horizontal = 16.dp,
+                                        vertical = 8.dp,
+                                    ),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    items(s.value, key = { it }) { username ->
+                                        UserCheckRow(
+                                            username = username,
+                                            selected = ui.selected.contains(username),
+                                            onToggle = { viewModel.toggleSelection(username) },
+                                        )
+                                    }
+                                }
+                                ActionBar(
+                                    modeNoun = modeNoun,
+                                    selectedCount = ui.selected.size,
+                                    totalCount = s.value.size,
+                                    deleting = ui.deleting,
+                                    onDeleteSelected = { deleteSelectedDialog = true },
+                                    onDeleteAll = { deleteAllDialog = true },
+                                )
+                            }
                         }
                     }
                 }
@@ -158,12 +172,12 @@ fun ExpiredUsersScreen(
 
     if (deleteAllDialog) {
         TypedConfirmDialog(
-            title = "Delete ALL expired users",
+            title = "Delete ALL $modeNoun users",
             body = "${users.size} accounts will be permanently removed. First: " +
                 users.take(5).joinToString(", ") + (if (users.size > 5) ", …" else ""),
             expected = users.size.toString(),
             confirmLabel = "Delete ${users.size}",
-            onConfirm = { viewModel.deleteAllExpired() },
+            onConfirm = { viewModel.deleteAllVisible() },
             onDismiss = { deleteAllDialog = false },
         )
     }
@@ -175,7 +189,7 @@ fun ExpiredUsersScreen(
             text = {
                 Column {
                     Text(
-                        "This zeros lifetime traffic counters for every user on the panel — not just expired ones.",
+                        "This zeros lifetime traffic counters for every user on the panel — not just $modeNoun ones.",
                         style = MaterialTheme.typography.bodyMedium,
                     )
                     Spacer(Modifier.height(12.dp))
@@ -188,6 +202,23 @@ fun ExpiredUsersScreen(
             confirmButton = {},
             dismissButton = { TextButton(onClick = { resetAllSheet = false }) { Text("Cancel") } },
         )
+    }
+}
+
+@Composable
+private fun ModeToggle(current: CleanupMode, onSelect: (CleanupMode) -> Unit) {
+    val modes = CleanupMode.entries
+    SingleChoiceSegmentedButtonRow(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+    ) {
+        modes.forEachIndexed { index, mode ->
+            SegmentedButton(
+                selected = current == mode,
+                onClick = { onSelect(mode) },
+                shape = SegmentedButtonDefaults.itemShape(index = index, count = modes.size),
+                label = { Text(mode.label) },
+            )
+        }
     }
 }
 
@@ -212,6 +243,7 @@ private fun UserCheckRow(username: String, selected: Boolean, onToggle: () -> Un
 
 @Composable
 private fun ActionBar(
+    modeNoun: String,
     selectedCount: Int,
     totalCount: Int,
     deleting: Boolean,
@@ -244,14 +276,14 @@ private fun ActionBar(
                 ) {
                     Icon(Icons.Default.DeleteSweep, contentDescription = null)
                     Spacer(Modifier.width(6.dp))
-                    Text("Delete all ($totalCount)")
+                    Text("All $modeNoun ($totalCount)")
                 }
                 FilledTonalButton(
                     onClick = onDeleteSelected,
                     enabled = selectedCount > 0,
                     modifier = Modifier.weight(1f),
                 ) {
-                    Text("Delete selected ($selectedCount)")
+                    Text("Selected ($selectedCount)")
                 }
             }
         }

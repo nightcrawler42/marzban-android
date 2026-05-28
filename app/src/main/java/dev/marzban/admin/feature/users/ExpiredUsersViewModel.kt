@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.marzban.admin.core.network.ApiResult
 import dev.marzban.admin.core.ui.UiState
+import dev.marzban.admin.data.dto.UserStatus
 import dev.marzban.admin.data.repository.UserRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -18,7 +19,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+enum class CleanupMode(val label: String) {
+    Expired("Expired"),
+    Limited("Limited"),
+}
+
 data class ExpiredUsersUi(
+    val mode: CleanupMode = CleanupMode.Expired,
     val users: UiState<List<String>> = UiState.Loading,
     val selected: Set<String> = emptySet(),
     val deleting: Boolean = false,
@@ -36,12 +43,26 @@ class ExpiredUsersViewModel @Inject constructor(
 
     init { load() }
 
+    fun setMode(mode: CleanupMode) {
+        if (_state.value.mode == mode) return
+        _state.update { it.copy(mode = mode, selected = emptySet(), users = UiState.Loading) }
+        load()
+    }
+
     fun load() {
+        val mode = _state.value.mode
         _state.update { it.copy(users = UiState.Loading, selected = emptySet()) }
         viewModelScope.launch {
-            when (val r = repository.expired()) {
-                is ApiResult.Success -> _state.update { it.copy(users = UiState.Success(r.value)) }
-                is ApiResult.Failure -> _state.update { it.copy(users = UiState.Error(r.error.message ?: "Error")) }
+            val result: ApiResult<List<String>> = when (mode) {
+                CleanupMode.Expired -> repository.expired()
+                CleanupMode.Limited -> when (val r = repository.listAll(status = UserStatus.Limited)) {
+                    is ApiResult.Success -> ApiResult.Success(r.value.map { it.username })
+                    is ApiResult.Failure -> ApiResult.Failure(r.error)
+                }
+            }
+            when (result) {
+                is ApiResult.Success -> _state.update { it.copy(users = UiState.Success(result.value)) }
+                is ApiResult.Failure -> _state.update { it.copy(users = UiState.Error(result.error.message ?: "Error")) }
             }
         }
     }
@@ -66,11 +87,27 @@ class ExpiredUsersViewModel @Inject constructor(
     /**
      * Deletes ONLY the selected usernames, one HTTP DELETE per user. We never
      * call the bulk endpoint here — that's what makes "delete N selected" safe
-     * even if the panel's expired set changes between load and confirm.
+     * even if the panel's expired/limited set changes between load and confirm.
      */
     fun deleteSelected() {
         val targets = _state.value.selected.toList()
         if (targets.isEmpty()) return
+        deleteUsersInParallel(targets)
+    }
+
+    /**
+     * "Delete all" iterates per-user instead of calling the bulk endpoint —
+     * Marzban's `DELETE /api/users/expired` returns 500 on panels with FK-bound
+     * notification / usage rows. Per-user delete cleanly cascades and also
+     * lets us report partial progress on failure.
+     */
+    fun deleteAllVisible() {
+        val targets = (_state.value.users as? UiState.Success)?.value.orEmpty()
+        if (targets.isEmpty()) return
+        deleteUsersInParallel(targets)
+    }
+
+    private fun deleteUsersInParallel(targets: List<String>) {
         _state.update { it.copy(deleting = true) }
         viewModelScope.launch {
             val results = targets.map { username ->
@@ -85,24 +122,6 @@ class ExpiredUsersViewModel @Inject constructor(
                     if (failed > 0) append(" • $failed failed")
                 }
             )
-            _state.update { it.copy(deleting = false, selected = emptySet()) }
-            load()
-        }
-    }
-
-    /**
-     * Bulk-delete with an EXPLICIT `expired_before = now()` guard so we never
-     * accidentally hit the catch-all endpoint without a constraint. The typed
-     * confirmation in the dialog is the second safety layer above this one.
-     */
-    fun deleteAllExpired() {
-        _state.update { it.copy(deleting = true) }
-        viewModelScope.launch {
-            val nowIso = java.time.Instant.now().toString().substringBefore('.')
-            when (val r = repository.deleteExpired(before = nowIso)) {
-                is ApiResult.Success -> _events.emit("Deleted ${r.value.size} expired user(s)")
-                is ApiResult.Failure -> _events.emit(r.error.message ?: "Failed")
-            }
             _state.update { it.copy(deleting = false, selected = emptySet()) }
             load()
         }

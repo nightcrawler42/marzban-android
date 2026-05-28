@@ -48,7 +48,7 @@ fun MoreScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             item { MoreEntry("Admins", "Manage panel admins", Icons.Default.AdminPanelSettings, onOpenAdmins) }
-            item { MoreEntry("Expired users", "Browse and bulk-clean expired accounts", Icons.Default.AssignmentLate, onOpenExpiredUsers) }
+            item { MoreEntry("Cleanup users", "Remove expired or data-capped accounts", Icons.Default.AssignmentLate, onOpenExpiredUsers) }
             item { MoreEntry("Hosts", "Edit proxy hosts per inbound", Icons.Default.Dns, onOpenHosts) }
             item { MoreEntry("Inbounds", "Inspect configured inbounds", Icons.AutoMirrored.Filled.List, onOpenInbounds) }
             item { MoreEntry("Core", "Status, config editor, live logs", Icons.Default.Memory, onOpenCore) }

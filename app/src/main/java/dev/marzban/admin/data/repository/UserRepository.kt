@@ -50,4 +50,31 @@ class UserRepository @Inject constructor(
         apiCall { api.user().expired(after, before) }
     suspend fun deleteExpired(after: String? = null, before: String? = null): ApiResult<List<String>> =
         apiCall { api.user().deleteExpired(after, before) }
+
+    /**
+     * Pulls every user across paginated calls. Used by the dashboard quota
+     * aggregator and the limited-users cleanup list. Caps at [hardLimit] to
+     * keep memory bounded on very large panels.
+     */
+    suspend fun listAll(
+        status: UserStatus? = null,
+        pageSize: Int = 500,
+        hardLimit: Int = 20_000,
+    ): ApiResult<List<UserResponse>> {
+        val collected = mutableListOf<UserResponse>()
+        var offset = 0
+        while (true) {
+            val res = list(offset = offset, limit = pageSize, status = status)
+            val page = when (res) {
+                is ApiResult.Success -> res.value
+                is ApiResult.Failure -> return ApiResult.Failure(res.error)
+            }
+            collected += page.users
+            if (page.users.size < pageSize) break
+            if (collected.size >= hardLimit) break
+            if (collected.size >= page.total) break
+            offset += pageSize
+        }
+        return ApiResult.Success(collected)
+    }
 }
